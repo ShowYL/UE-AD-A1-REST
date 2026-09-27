@@ -49,12 +49,50 @@ paths:
                 items:
                   $ref: "#/components/schemas/Movie"
               example:
-                - id: 1
-                  title: "The Shawshank Redemption"
-                  rating: 9
-                  director: "Frank Darabont"
+                - title: "The Good Dinosaur"
+                  rating: 7.4
+                  director: "Peter Sohn"
+                  id: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
 
   /movies:
+    get:
+      tags:
+        - Movies
+      summary: Get movie by title
+      description: Returns a movie matching the specified title.
+      operationId: getMovieByTitle
+      parameters:
+        - name: title
+          in: query
+          description: Exact title of the movie to find.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          example: "The Martian"
+      responses:
+        "200":
+          description: Movie matching the specified title.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+              example:
+                title: "The Martian"
+                rating: 8.2
+                director: "Ridley Scott"
+                id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Movie with the specified title was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie title not found"
+
     post:
       tags:
         - Movies
@@ -67,12 +105,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Movie"
+              $ref: "#/components/schemas/MovieCreate"
             example:
-              id: 1
-              title: "The Shawshank Redemption"
-              rating: 9
-              director: "Frank Darabont"
+              title: "The Martian"
+              rating: 8.2
+              director: "Ridley Scott"
+              id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
       responses:
         "200":
           description: Movie successfully created.
@@ -81,10 +119,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/Movie"
               example:
-                id: 1
-                title: "The Shawshank Redemption"
-                rating: 9
-                director: "Frank Darabont"
+                title: "The Martian"
+                rating: 8.2
+                director: "Ridley Scott"
+                id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
         "400":
           $ref: "#/components/responses/BadRequest"
         "409":
@@ -96,50 +134,12 @@ paths:
               example:
                 error: "Movie id exist"
 
-  /movies/title:
-    get:
-      tags:
-        - Movies
-      summary: Get movie by title
-      description: Returns a movie matching the specified title.
-      operationId: getMovieByTitle
-      parameters:
-        - name: title
-          in: query
-          description: Title of the movie to find.
-          required: true
-          schema:
-            type: string
-          example: "The Shawshank Redemption"
-      responses:
-        "200":
-          description: Movie matching the specified title.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Movie"
-              example:
-                id: 1
-                title: "The Shawshank Redemption"
-                rating: 9
-                director: "Frank Darabont"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          description: Movie with the specified title was not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                error: "Movie title not found"
-
-  /movies/{movieId}:
+  /movies/{movie_id}:
     get:
       tags:
         - Movies
       summary: Get movie by ID
-      description: Returns a movie matching the specified ID.
+      description: Returns a movie matching the specified movie ID.
       operationId: getMovieById
       parameters:
         - $ref: "#/components/parameters/MovieId"
@@ -151,10 +151,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/Movie"
               example:
-                id: 1
-                title: "The Shawshank Redemption"
-                rating: 9
-                director: "Frank Darabont"
+                title: "The Martian"
+                rating: 8.2
+                director: "Ridley Scott"
+                id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
         "404":
           description: Movie with the specified ID was not found.
           content:
@@ -180,9 +180,9 @@ paths:
             schema:
               $ref: "#/components/schemas/MovieUpdate"
             example:
-              title: "The Shawshank Redemption"
-              rating: 10
-              director: "Frank Darabont"
+              title: "The Martian"
+              rating: 8.5
+              director: "Ridley Scott"
       responses:
         "200":
           description: Movie successfully updated.
@@ -190,11 +190,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Movie"
-              example:
-                id: 1
-                title: "The Shawshank Redemption"
-                rating: 10
-                director: "Frank Darabont"
         "400":
           $ref: "#/components/responses/BadRequest"
         "404":
@@ -210,7 +205,7 @@ paths:
       tags:
         - Movies
       summary: Delete movie
-      description: Deletes a movie matching the specified ID.
+      description: Deletes a movie matching the specified movie ID.
       operationId: deleteMovie
       parameters:
         - $ref: "#/components/parameters/MovieId"
@@ -226,7 +221,7 @@ paths:
               example:
                 error: "Movie id not found"
 
-  /movies/{movieId}/{rate}:
+  /movies/{movie_id}/{rate}:
     patch:
       tags:
         - Movies
@@ -240,8 +235,9 @@ paths:
           description: New rating for the movie.
           required: true
           schema:
-            type: integer
-          example: 8
+            type: number
+            format: float
+          example: 8.5
       responses:
         "200":
           description: Movie rating successfully updated.
@@ -249,11 +245,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Movie"
-              example:
-                id: 1
-                title: "The Shawshank Redemption"
-                rating: 8
-                director: "Frank Darabont"
         "404":
           description: Movie with the specified ID was not found.
           content:
@@ -266,13 +257,14 @@ paths:
 components:
   parameters:
     MovieId:
-      name: movieId
+      name: movie_id
       in: path
-      description: ID of the movie.
+      description: UUID identifying the movie.
       required: true
       schema:
-        type: integer
-      example: 1
+        type: string
+        format: uuid
+      example: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
 
   schemas:
     Movie:
@@ -285,25 +277,59 @@ components:
         - director
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
           description: Unique identifier of the movie.
-          example: 1
+          example: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
         title:
           type: string
+          minLength: 1
           description: Title of the movie.
-          example: "The Shawshank Redemption"
+          example: "The Martian"
         rating:
-          type: integer
+          type: number
+          format: float
           description: Rating of the movie.
-          example: 9
+          example: 8.2
         director:
           type: string
+          minLength: 1
           description: Director of the movie.
-          example: "Frank Darabont"
+          example: "Ridley Scott"
+
+    MovieCreate:
+      type: object
+      description: Data required to create a movie.
+      required:
+        - id
+        - title
+        - rating
+        - director
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the movie.
+          example: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+        title:
+          type: string
+          minLength: 1
+          description: Title of the movie.
+          example: "The Martian"
+        rating:
+          type: number
+          format: float
+          description: Rating of the movie.
+          example: 8.2
+        director:
+          type: string
+          minLength: 1
+          description: Director of the movie.
+          example: "Ridley Scott"
 
     MovieUpdate:
       type: object
-      description: Fields used to update a movie.
+      description: Data required to update a movie.
       required:
         - title
         - rating
@@ -311,16 +337,19 @@ components:
       properties:
         title:
           type: string
+          minLength: 1
           description: Title of the movie.
-          example: "The Shawshank Redemption"
+          example: "The Martian"
         rating:
-          type: integer
-          description: New rating of the movie.
-          example: 10
+          type: number
+          format: float
+          description: Rating of the movie.
+          example: 8.5
         director:
           type: string
+          minLength: 1
           description: Director of the movie.
-          example: "Frank Darabont"
+          example: "Ridley Scott"
 
     Error:
       type: object
@@ -341,4 +370,4 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
           example:
-            error: "A body must be provided"
+            error: "No data provided for the field title"

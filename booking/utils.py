@@ -1,4 +1,5 @@
 from functools import wraps
+from http import HTTPStatus
 
 from flask import jsonify, make_response, request
 
@@ -14,7 +15,7 @@ def mandatory_url_field(fields: list[str]):
                 if path_value is None and query_value is None:
                     return make_response(
                         jsonify({"error": f"No data provided for the field {field}"}),
-                        400,
+                        HTTPStatus.BAD_REQUEST,
                     )
             return func(*args, **kwargs)
 
@@ -29,13 +30,16 @@ def mandatory_body_field(fields: list[str]):
         def wrapper(*args, **kwargs):
             data = request.get_json()
             if not data:
-                return make_response(jsonify({"error": "A body must be provided"}), 400)
+                return make_response(
+                    jsonify({"error": "A body must be provided"}),
+                    HTTPStatus.BAD_REQUEST,
+                )
 
             for field in fields:
                 if field not in data or data[field] is None:
                     return make_response(
                         jsonify({"error": f"No data provided for the field {field}"}),
-                        400,
+                        HTTPStatus.BAD_REQUEST,
                     )
             return func(*args, **kwargs)
 
@@ -45,4 +49,4 @@ def mandatory_body_field(fields: list[str]):
 
 
 def not_found(value):
-    return make_response(jsonify({"error": f"{value} not found"}), 404)
+    return make_response(jsonify({"error": f"{value} not found"}), HTTPStatus.NOT_FOUND)
