@@ -1,0 +1,369 @@
+openapi: 3.0.3
+
+info:
+  title: Booking Service API
+  description: REST API for managing movie bookings.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3201
+    description: Local development server
+
+tags:
+  - name: General
+    description: General API operations
+  - name: Bookings
+    description: Booking management operations
+
+paths:
+  /:
+    get:
+      tags:
+        - General
+      summary: Get welcome page
+      description: Returns the welcome page of the Booking service.
+      operationId: getHome
+      responses:
+        "200":
+          description: Welcome page.
+          content:
+            text/html:
+              schema:
+                type: string
+              example: "<h1 style='color:blue'>Welcome to the Booking service!</h1>"
+
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: Get all bookings
+      description: Returns all bookings.
+      operationId: getBookings
+      responses:
+        "200":
+          description: List of all bookings.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+              example:
+                - userid: "chris_rivers"
+                  dates:
+                    - date: "20151201"
+                      movies:
+                        - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                - userid: "garret_heaton"
+                  dates:
+                    - date: "20151201"
+                      movies:
+                        - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                    - date: "20151202"
+                      movies:
+                        - "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
+
+    post:
+      tags:
+        - Bookings
+      summary: Create a booking
+      description: >
+        Creates a new booking for a user. The user must exist in the User
+        service, each requested date must exist in the Schedule service,
+        and every requested movie must be scheduled on the requested date.
+      operationId: createBooking
+      requestBody:
+        description: Booking to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingCreate"
+            example:
+              userid: "chris_rivers"
+              dates:
+                - date: "20151201"
+                  movies:
+                    - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+      responses:
+        "201":
+          description: Booking successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+              example:
+                userid: "chris_rivers"
+                dates:
+                  - date: "20151201"
+                    movies:
+                      - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "409":
+          description: A booking for this user already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Booking for this user already exists"
+
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /bookings/{user_id}:
+    get:
+      tags:
+        - Bookings
+      summary: Get booking by user ID
+      description: Returns the booking belonging to the specified user.
+      operationId: getBookingByUser
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Booking belonging to the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+              example:
+                userid: "chris_rivers"
+                dates:
+                  - date: "20151201"
+                    movies:
+                      - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+
+        "404":
+          description: No booking was found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Booking for user not found"
+
+    put:
+      tags:
+        - Bookings
+      summary: Update a booking
+      description: >
+        Updates the dates and movies of an existing booking. The user must
+        exist in the User service, each requested date must exist in the
+        Schedule service, and every requested movie must be scheduled on
+        the requested date.
+      operationId: updateBooking
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        description: Updated booking dates and movies.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingUpdate"
+            example:
+              dates:
+                - date: "20151205"
+                  movies:
+                    - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+                    - "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
+      responses:
+        "200":
+          description: Booking successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+              example:
+                userid: "chris_rivers"
+                dates:
+                  - date: "20151205"
+                    movies:
+                      - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+                      - "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "404":
+          description: No booking was found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Booking for user not found"
+
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    delete:
+      tags:
+        - Bookings
+      summary: Delete a booking
+      description: Deletes the booking belonging to the specified user.
+      operationId: deleteBooking
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: Booking successfully deleted.
+
+        "404":
+          description: No booking was found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Booking for user not found"
+
+components:
+  parameters:
+    UserId:
+      name: user_id
+      in: path
+      description: Unique identifier of the user.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+      example: "chris_rivers"
+
+  schemas:
+    Booking:
+      type: object
+      description: A user's movie booking.
+      required:
+        - userid
+        - dates
+      properties:
+        userid:
+          type: string
+          minLength: 1
+          description: ID of the user who owns the booking.
+          example: "chris_rivers"
+
+        dates:
+          type: array
+          description: Dates and movies included in the booking.
+          items:
+            $ref: "#/components/schemas/BookingDate"
+
+    BookingCreate:
+      type: object
+      description: Data required to create a booking.
+      required:
+        - userid
+        - dates
+      properties:
+        userid:
+          type: string
+          minLength: 1
+          description: ID of the user who owns the booking.
+          example: "chris_rivers"
+
+        dates:
+          type: array
+          description: Dates and movies to book.
+          items:
+            $ref: "#/components/schemas/BookingDate"
+
+    BookingUpdate:
+      type: object
+      description: Data required to update a booking.
+      required:
+        - dates
+      properties:
+        dates:
+          type: array
+          description: New dates and movies for the booking.
+          items:
+            $ref: "#/components/schemas/BookingDate"
+
+    BookingDate:
+      type: object
+      description: Movies booked for a specific date.
+      required:
+        - date
+        - movies
+      properties:
+        date:
+          type: string
+          pattern: '^\d{8}$'
+          description: Date of the booking in YYYYMMDD format.
+          example: "20151201"
+
+        movies:
+          type: array
+          description: IDs of movies booked for this date.
+          items:
+            type: string
+            format: uuid
+          example:
+            - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+
+    Error:
+      type: object
+      description: Error response.
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Description of the error.
+          example: "Booking for user not found"
+
+  responses:
+    BadRequest:
+      description: >
+        The request is invalid, the specified user does not exist,
+        the specified date does not exist in the Schedule service,
+        or a requested movie is not scheduled for the requested date.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            invalidUser:
+              summary: User does not exist
+              value:
+                error: "The User with the id unknown_user doesnt exist"
+
+            invalidDate:
+              summary: Schedule does not exist
+              value:
+                error: "The Schedule for the date 20151206 doesnt exist"
+
+            invalidMovie:
+              summary: Movie is not scheduled
+              value:
+                error: "The Movie with the id 276c79ec-a26a-40a6-b3d3-fb242a5947b6 is not scheduled for this date"
+
+            missingField:
+              summary: Required field is missing
+              value:
+                error: "No data provided for the field dates"
+
+    ServiceUnavailable:
+      description: >
+        A required external service could not be reached or returned
+        an unexpected response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            userService:
+              summary: User service unavailable
+              value:
+                error: "Could not load the user"
+
+            scheduleService:
+              summary: Schedule service unavailable
+              value:
+                error: "Could not load the schedule"
