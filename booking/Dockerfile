@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # start booking.py when the container is started
-CMD ["python", "booking.py"]
+CMD ["python", "-u" , "booking.py"]

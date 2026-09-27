@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # start user.py when the container is started
-CMD ["python","user.py"]
+CMD ["python", "-u" , "user.py"]

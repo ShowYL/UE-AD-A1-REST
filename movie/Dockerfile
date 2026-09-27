@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # start movie.py when the container is started
-CMD ["python", "movie.py"]
+CMD ["python", "-u", "movie.py"]

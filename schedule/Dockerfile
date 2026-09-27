@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # start schedule.py when the container is started
-CMD ["python","schedule.py"]
+CMD ["python", "-u" , "schedule.py"]
