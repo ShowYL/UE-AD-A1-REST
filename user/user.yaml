@@ -1,0 +1,270 @@
+openapi: 3.0.3
+
+info:
+  title: User Service API
+  description: REST API for managing users.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3203
+    description: Local development server
+
+tags:
+  - name: General
+    description: General API operations
+  - name: Users
+    description: User management operations
+
+paths:
+  /:
+    get:
+      tags:
+        - General
+      summary: Get welcome page
+      description: Returns the welcome page of the User service.
+      operationId: getHome
+      responses:
+        "200":
+          description: Welcome page.
+          content:
+            text/html:
+              schema:
+                type: string
+              example: "<h1 style='color:blue'>Welcome to the User service!</h1>"
+
+  /user:
+    post:
+      tags:
+        - Users
+      summary: Create a user
+      description: Creates a new user.
+      operationId: createUser
+      requestBody:
+        description: User to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+            example:
+              id: "chris_rivers"
+              name: "Chris Rivers"
+              last_active: 1360031010
+      responses:
+        "201":
+          description: User successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: "chris_rivers"
+                name: "Chris Rivers"
+                last_active: 1360031010
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: A user with this ID already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User id exist"
+
+  /user/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Returns a user matching the specified user ID.
+      operationId: getUserById
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: User matching the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: "chris_rivers"
+                name: "Chris Rivers"
+                last_active: 1360031010
+        "404":
+          description: User with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User id not found"
+
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: Updates the name and last active timestamp of a user.
+      operationId: updateUser
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        description: Updated user information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+            example:
+              name: "Chris Rivers"
+              last_active: 1360032000
+      responses:
+        "201":
+          description: User successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: "chris_rivers"
+                name: "Chris Rivers"
+                last_active: 1360032000
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: User with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User id not found"
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Deletes a user matching the specified user ID.
+      operationId: deleteUser
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: User successfully deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: "chris_rivers"
+                name: "Chris Rivers"
+                last_active: 1360031010
+        "404":
+          description: User with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User id not found"
+
+components:
+  parameters:
+    UserId:
+      name: user_id
+      in: path
+      description: Unique identifier of the user.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+      example: "chris_rivers"
+
+  schemas:
+    User:
+      type: object
+      description: A user.
+      required:
+        - id
+        - name
+        - last_active
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: Unique identifier of the user.
+          example: "chris_rivers"
+        name:
+          type: string
+          minLength: 1
+          description: Full name of the user.
+          example: "Chris Rivers"
+        last_active:
+          type: integer
+          format: int64
+          description: Unix timestamp indicating when the user was last active.
+          example: 1360031010
+
+    UserCreate:
+      type: object
+      description: Data required to create a user.
+      required:
+        - id
+        - name
+        - last_active
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: Unique identifier of the user.
+          example: "chris_rivers"
+        name:
+          type: string
+          minLength: 1
+          description: Full name of the user.
+          example: "Chris Rivers"
+        last_active:
+          type: integer
+          format: int64
+          description: Unix timestamp indicating when the user was last active.
+          example: 1360031010
+
+    UserUpdate:
+      type: object
+      description: Data required to update a user.
+      required:
+        - name
+        - last_active
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Full name of the user.
+          example: "Chris Rivers"
+        last_active:
+          type: integer
+          format: int64
+          description: Unix timestamp indicating when the user was last active.
+          example: 1360032000
+
+    Error:
+      type: object
+      description: Error response.
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Description of the error.
+          example: "User id not found"
+
+  responses:
+    BadRequest:
+      description: The request is invalid or required data is missing.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "No data provided for the field name"

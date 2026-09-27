@@ -1,10 +1,8 @@
 import json
-import sys
 from http import HTTPStatus
 
 from flask import Flask, Response, jsonify, make_response, request
 from utils import mandatory_body_field, mandatory_url_field, not_found
-from werkzeug.exceptions import NotFound
 
 app = Flask(__name__)
 
@@ -103,7 +101,7 @@ def add_movie():
 
     movies.append(movie)
     write(movies)
-    return make_response(movie, HTTPStatus.OK)
+    return make_response(movie, HTTPStatus.CREATED)
 
 
 @app.route("/movies", methods=["GET"])
