@@ -1,5 +1,5 @@
 import json
-from http import HTTPStatus
+from http import HTTPMethod, HTTPStatus
 
 from flask import Flask, Response, jsonify, make_response, request
 from utils import mandatory_body_field, mandatory_url_field, not_found
@@ -41,19 +41,19 @@ def update_movie(old_movie, new_movie):
 
 
 # root message
-@app.route("/", methods=["GET"])
+@app.route("/", methods=[HTTPMethod.GET])
 def home():
     return make_response(
         "<h1 style='color:blue'>Welcome to the Movie service!</h1>", 200
     )
 
 
-@app.route("/json", methods=["GET"])
+@app.route("/json", methods=[HTTPMethod.GET])
 def getAll():
     return make_response(jsonify(movies), HTTPStatus.OK)
 
 
-@app.route("/movies/<movie_id>", methods=["GET"])
+@app.route("/movies/<movie_id>", methods=[HTTPMethod.GET])
 @mandatory_url_field(fields=["movie_id"])
 def get_movie_by_id_endpoint(movie_id):
     if not movie_exist(movie_id):
@@ -63,7 +63,7 @@ def get_movie_by_id_endpoint(movie_id):
     return make_response(movie, HTTPStatus.OK)
 
 
-@app.route("/movies/<movie_id>/<rate>", methods=["PATCH"])
+@app.route("/movies/<movie_id>/<rate>", methods=[HTTPMethod.PATCH])
 @mandatory_url_field(fields=["movie_id", "rate"])
 def update_movie_rating(movie_id, rate):
     if not movie_exist(movie_id):
@@ -76,7 +76,7 @@ def update_movie_rating(movie_id, rate):
     return make_response(movie, HTTPStatus.OK)
 
 
-@app.route("/movies/<movie_id>", methods=["PUT"])
+@app.route("/movies/<movie_id>", methods=[HTTPMethod.PUT])
 @mandatory_url_field(fields=["movie_id"])
 @mandatory_body_field(fields=["title", "rating", "director"])
 def update_movie_endpoint(movie_id):
@@ -91,7 +91,7 @@ def update_movie_endpoint(movie_id):
     return make_response(movie, HTTPStatus.OK)
 
 
-@app.route("/movies", methods=["POST"])
+@app.route("/movies", methods=[HTTPMethod.POST])
 @mandatory_body_field(fields=["id", "title", "rating", "director"])
 def add_movie():
     movie = request.get_json()
@@ -104,7 +104,7 @@ def add_movie():
     return make_response(movie, HTTPStatus.CREATED)
 
 
-@app.route("/movies", methods=["GET"])
+@app.route("/movies", methods=[HTTPMethod.GET])
 @mandatory_url_field(fields=["title"])
 def get_movie_by_title():
     title = request.args["title"]
@@ -115,7 +115,7 @@ def get_movie_by_title():
     return not_found("Movie title")
 
 
-@app.route("/movies/<movie_id>", methods=["DELETE"])
+@app.route("/movies/<movie_id>", methods=[HTTPMethod.DELETE])
 @mandatory_url_field(fields=["movie_id"])
 def delete_movie(movie_id):
     if not movie_exist(movie_id):
