@@ -1,0 +1,304 @@
+openapi: 3.0.3
+
+info:
+  title: Showtime Service API
+  description: REST API for managing movie schedules.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3202
+    description: Local development server
+
+tags:
+  - name: General
+    description: General API operations
+  - name: Schedules
+    description: Schedule management operations
+
+paths:
+  /:
+    get:
+      tags:
+        - General
+      summary: Get welcome page
+      description: Returns the welcome page of the Showtime service.
+      operationId: getHome
+      responses:
+        "200":
+          description: Welcome page.
+          content:
+            text/html:
+              schema:
+                type: string
+              example: "<h1 style='color:blue'>Welcome to the Showtime service!</h1>"
+
+  /schedule:
+    get:
+      tags:
+        - Schedules
+      summary: Get all schedules
+      description: Returns all movie schedules.
+      operationId: getSchedules
+      responses:
+        "200":
+          description: List of all schedules.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Schedule"
+              example:
+                - date: "20151130"
+                  movies:
+                    - "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+                    - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+                    - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
+
+    post:
+      tags:
+        - Schedules
+      summary: Create a schedule
+      description: Creates a new movie schedule. All movie IDs must exist in the Movie service.
+      operationId: createSchedule
+      requestBody:
+        description: Schedule to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleCreate"
+            example:
+              date: "20151206"
+              movies:
+                - "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+                - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+      responses:
+        "201":
+          description: Schedule successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+              example:
+                date: "20151206"
+                movies:
+                  - "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+                  - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: A schedule for this date already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Schedule id exist"
+        "503":
+          $ref: "#/components/responses/MovieServiceUnavailable"
+
+  /schedule/{date}:
+    get:
+      tags:
+        - Schedules
+      summary: Get schedule by date
+      description: Returns the movie schedule for the specified date.
+      operationId: getScheduleByDate
+      parameters:
+        - $ref: "#/components/parameters/ScheduleDate"
+      responses:
+        "200":
+          description: Schedule for the specified date.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+              example:
+                date: "20151130"
+                movies:
+                  - "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+                  - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+                  - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
+        "404":
+          description: Schedule for the specified date was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Schedule for this date not found"
+
+    put:
+      tags:
+        - Schedules
+      summary: Update schedule
+      description: Updates the list of movies scheduled for the specified date. All movie IDs must exist in the Movie service.
+      operationId: updateSchedule
+      parameters:
+        - $ref: "#/components/parameters/ScheduleDate"
+      requestBody:
+        description: Updated list of movie IDs.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleUpdate"
+            example:
+              movies:
+                - "96798c08-d19b-4986-a05d-7da856efb697"
+                - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
+      responses:
+        "200":
+          description: Schedule successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+              example:
+                date: "20151130"
+                movies:
+                  - "96798c08-d19b-4986-a05d-7da856efb697"
+                  - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Schedule for the specified date was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Schedule for this date not found"
+        "503":
+          $ref: "#/components/responses/MovieServiceUnavailable"
+
+    delete:
+      tags:
+        - Schedules
+      summary: Delete schedule
+      description: Deletes the schedule for the specified date.
+      operationId: deleteSchedule
+      parameters:
+        - $ref: "#/components/parameters/ScheduleDate"
+      responses:
+        "204":
+          description: Schedule successfully deleted.
+        "404":
+          description: Schedule for the specified date was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Schedule for this date not found"
+
+components:
+  parameters:
+    ScheduleDate:
+      name: date
+      in: path
+      description: Date identifying the schedule, using the YYYYMMDD format.
+      required: true
+      schema:
+        type: string
+        pattern: '^\d{8}$'
+      example: "20151130"
+
+  schemas:
+    Schedule:
+      type: object
+      description: A movie schedule for a specific date.
+      required:
+        - date
+        - movies
+      properties:
+        date:
+          type: string
+          pattern: '^\d{8}$'
+          description: Date of the schedule in YYYYMMDD format.
+          example: "20151130"
+        movies:
+          type: array
+          description: List of movie IDs scheduled for this date.
+          items:
+            type: string
+            format: uuid
+          example:
+            - "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+            - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+
+    ScheduleCreate:
+      type: object
+      description: Data required to create a schedule.
+      required:
+        - date
+        - movies
+      properties:
+        date:
+          type: string
+          pattern: '^\d{8}$'
+          description: Date of the schedule in YYYYMMDD format.
+          example: "20151206"
+        movies:
+          type: array
+          description: List of movie IDs scheduled for this date.
+          items:
+            type: string
+            format: uuid
+          example:
+            - "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+            - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+
+    ScheduleUpdate:
+      type: object
+      description: Data required to update a schedule.
+      required:
+        - movies
+      properties:
+        movies:
+          type: array
+          description: New list of movie IDs scheduled for the date.
+          items:
+            type: string
+            format: uuid
+          example:
+            - "96798c08-d19b-4986-a05d-7da856efb697"
+            - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
+
+    Error:
+      type: object
+      description: Error response.
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Description of the error.
+          example: "Schedule for this date not found"
+
+  responses:
+    BadRequest:
+      description: The request is invalid, required data is missing, or a referenced movie does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            missingField:
+              summary: Missing required field
+              value:
+                error: "No data provided for the field movies"
+            invalidMovie:
+              summary: Movie does not exist
+              value:
+                error: "The Movie with the id 720d006c-3a57-4b6a-b18f-9b713b073f3c doesnt exist"
+
+    MovieServiceUnavailable:
+      description: The Movie service could not be reached or returned an unexpected response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Could not load the movies"

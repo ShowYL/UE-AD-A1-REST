@@ -112,7 +112,7 @@ paths:
               director: "Ridley Scott"
               id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
       responses:
-        "200":
+        "201":
           description: Movie successfully created.
           content:
             application/json:

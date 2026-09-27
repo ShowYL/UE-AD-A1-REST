@@ -1,7 +1,7 @@
 import json
 from http import HTTPMethod, HTTPStatus
 
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, Response, jsonify, make_response, request
 from utils import mandatory_body_field, mandatory_url_field, not_found
 
 app = Flask(__name__)
@@ -84,7 +84,7 @@ def delete_user(user_id):
 
     user = get_user_by_id(user_id)
     users.remove(user)
-    return make_response(user, HTTPStatus.NO_CONTENT)
+    return Response(status=HTTPStatus.NO_CONTENT)
 
 
 if __name__ == "__main__":
