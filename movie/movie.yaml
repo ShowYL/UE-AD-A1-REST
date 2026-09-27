@@ -1,199 +1,344 @@
 openapi: 3.0.3
+
 info:
   title: Movie Service API
-  description: API for browsing, adding, and rating movies.
-  version: "1.0.0"
-  contact:
-    name: Helene Coullon
-    url: https://helene-coullon.fr/
-    email: helene.coullon@imt-atlantique.fr
+  description: REST API for managing movies.
+  version: 1.0.0
+
 servers:
   - url: http://localhost:3200
     description: Local development server
 
 tags:
-- name: admin
-  description: Secured Admin-only calls
-- name: dev
-  description: Operations available to regular developers
+  - name: General
+    description: General API operations
+  - name: Movies
+    description: Movie management operations
 
 paths:
   /:
     get:
       tags:
-        - dev
-      summary: Service home page
-      description: Returns an HTML welcome message.
+        - General
+      summary: Get welcome page
+      description: Returns the welcome page of the Movie service.
+      operationId: getHome
       responses:
         "200":
-          description: HTML welcome message
+          description: Welcome page.
           content:
             text/html:
               schema:
                 type: string
-                example: "<h1 style='color:blue'>Welcome to the Movie service!</h1>"
+              example: "<h1 style='color:blue'>Welcome to the Movie service!</h1>"
 
   /json:
     get:
       tags:
-        - dev
-      summary: Retrieve the full list of movies
-      description: Returns the list of all available movies.
+        - Movies
+      summary: Get all movies
+      description: Returns all movies.
+      operationId: getMovies
       responses:
         "200":
-          description: List of movies
+          description: List of all movies.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Movie"
+              example:
+                - id: 1
+                  title: "The Shawshank Redemption"
+                  rating: 9
+                  director: "Frank Darabont"
 
-  /movies/{movieid}:
-    get:
-      tags:
-        - dev
-      summary: Retrieve a movie by its ID
-      parameters:
-        - $ref: "#/components/parameters/MovieId"
-      responses:
-        "200":
-          description: Movie found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Movie"
-        "500":
-          description: Movie ID not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
+  /movies:
     post:
       tags:
-        - admin
-      summary: Add a new movie
-      description: Adds a movie with the given ID, if it doesn't already exist.
-      parameters:
-        - $ref: "#/components/parameters/MovieId"
+        - Movies
+      summary: Create a movie
+      description: Creates a new movie.
+      operationId: createMovie
       requestBody:
+        description: Movie to create.
         required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/Movie"
+            example:
+              id: 1
+              title: "The Shawshank Redemption"
+              rating: 9
+              director: "Frank Darabont"
       responses:
         "200":
-          description: Movie added successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: movie added
-        "500":
-          description: Movie ID already exists
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /moviesbytitle:
-    get:
-      tags:
-        - dev
-      summary: Retrieve a movie by its title
-      parameters:
-        - name: title
-          in: query
-          required: true
-          description: Exact title of the movie to search for
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Movie found
+          description: Movie successfully created.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Movie"
-        "500":
-          description: Movie title not found
+              example:
+                id: 1
+                title: "The Shawshank Redemption"
+                rating: 9
+                director: "Frank Darabont"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: A movie with this ID already exists.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie id exist"
 
-  /movies/{movieid}/{rate}:
+  /movies/title:
+    get:
+      tags:
+        - Movies
+      summary: Get movie by title
+      description: Returns a movie matching the specified title.
+      operationId: getMovieByTitle
+      parameters:
+        - name: title
+          in: query
+          description: Title of the movie to find.
+          required: true
+          schema:
+            type: string
+          example: "The Shawshank Redemption"
+      responses:
+        "200":
+          description: Movie matching the specified title.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+              example:
+                id: 1
+                title: "The Shawshank Redemption"
+                rating: 9
+                director: "Frank Darabont"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Movie with the specified title was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie title not found"
+
+  /movies/{movieId}:
+    get:
+      tags:
+        - Movies
+      summary: Get movie by ID
+      description: Returns a movie matching the specified ID.
+      operationId: getMovieById
+      parameters:
+        - $ref: "#/components/parameters/MovieId"
+      responses:
+        "200":
+          description: Movie matching the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+              example:
+                id: 1
+                title: "The Shawshank Redemption"
+                rating: 9
+                director: "Frank Darabont"
+        "404":
+          description: Movie with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie id not found"
+
     put:
       tags:
-        - admin
-      summary: Update a movie's rating
+        - Movies
+      summary: Update movie
+      description: Updates the title, rating, and director of a movie.
+      operationId: updateMovie
+      parameters:
+        - $ref: "#/components/parameters/MovieId"
+      requestBody:
+        description: Updated movie information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovieUpdate"
+            example:
+              title: "The Shawshank Redemption"
+              rating: 10
+              director: "Frank Darabont"
+      responses:
+        "200":
+          description: Movie successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+              example:
+                id: 1
+                title: "The Shawshank Redemption"
+                rating: 10
+                director: "Frank Darabont"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Movie with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie id not found"
+
+    delete:
+      tags:
+        - Movies
+      summary: Delete movie
+      description: Deletes a movie matching the specified ID.
+      operationId: deleteMovie
+      parameters:
+        - $ref: "#/components/parameters/MovieId"
+      responses:
+        "204":
+          description: Movie successfully deleted.
+        "404":
+          description: Movie with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie id not found"
+
+  /movies/{movieId}/{rate}:
+    patch:
+      tags:
+        - Movies
+      summary: Update movie rating
+      description: Updates the rating of a movie.
+      operationId: updateMovieRating
       parameters:
         - $ref: "#/components/parameters/MovieId"
         - name: rate
           in: path
+          description: New rating for the movie.
           required: true
-          description: New rating to assign to the movie
           schema:
-            type: string
+            type: integer
+          example: 8
       responses:
         "200":
-          description: Movie updated successfully
+          description: Movie rating successfully updated.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Movie"
-        "500":
-          description: Movie ID not found
+              example:
+                id: 1
+                title: "The Shawshank Redemption"
+                rating: 8
+                director: "Frank Darabont"
+        "404":
+          description: Movie with the specified ID was not found.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+              example:
+                error: "Movie id not found"
 
 components:
   parameters:
     MovieId:
-      name: movieid
+      name: movieId
       in: path
+      description: ID of the movie.
       required: true
-      description: Unique identifier of the movie
       schema:
-        type: string
+        type: integer
+      example: 1
 
   schemas:
     Movie:
       type: object
-      description: Representation of a movie.
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier of the movie
-          example: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
-        title:
-          type: string
-          description: Movie title
-          example: "The Good Dinosaur"
-        rating:
-          type: number
-          format: float
-          description: Rating assigned to the movie
-          example: 7.4
-        director:
-          type: string
-          description: Movie director
-          example: "Peter Sohn"
+      description: A movie.
       required:
         - id
         - title
+        - rating
+        - director
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the movie.
+          example: 1
+        title:
+          type: string
+          description: Title of the movie.
+          example: "The Shawshank Redemption"
+        rating:
+          type: integer
+          description: Rating of the movie.
+          example: 9
+        director:
+          type: string
+          description: Director of the movie.
+          example: "Frank Darabont"
+
+    MovieUpdate:
+      type: object
+      description: Fields used to update a movie.
+      required:
+        - title
+        - rating
+        - director
+      properties:
+        title:
+          type: string
+          description: Title of the movie.
+          example: "The Shawshank Redemption"
+        rating:
+          type: integer
+          description: New rating of the movie.
+          example: 10
+        director:
+          type: string
+          description: Director of the movie.
+          example: "Frank Darabont"
 
     Error:
       type: object
+      description: Error response.
+      required:
+        - error
       properties:
         error:
           type: string
-          example: "Movie ID not found"
+          description: Description of the error.
+          example: "Movie id not found"
+
+  responses:
+    BadRequest:
+      description: The request is invalid or required data is missing.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "A body must be provided"
