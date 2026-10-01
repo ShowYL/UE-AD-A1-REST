@@ -1,0 +1,1019 @@
+{
+  "info": {
+    "_postman_id": "08712eb0-e34c-4bc1-a300-01068be0ee0f",
+    "name": "Movie Service API",
+    "description": "REST API for managing movies.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52053604",
+    "_collection_link": "https://go.postman.co/collection/52053604-08712eb0-e34c-4bc1-a300-01068be0ee0f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "/",
+      "item": [
+        {
+          "name": "Get welcome page",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/html"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Returns the welcome page of the Movie service."
+          },
+          "response": [
+            {
+              "name": "Welcome page.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "text/html"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/html"
+                }
+              ],
+              "cookie": [],
+              "body": "<h1 style='color:blue'>Welcome to the Movie service!</h1>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "json",
+      "item": [
+        {
+          "name": "Get all movies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "json"
+              ]
+            },
+            "description": "Returns all movies."
+          },
+          "response": [
+            {
+              "name": "List of all movies.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/json",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "json"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"The Good Dinosaur\",\n    \"rating\": 7.4,\n    \"director\": \"Peter Sohn\",\n    \"id\": \"720d006c-3a57-4b6a-b18f-9b713b073f3c\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "movies",
+      "item": [
+        {
+          "name": "{movie_id}",
+          "item": [
+            {
+              "name": "{rate}",
+              "item": [
+                {
+                  "name": "Update movie rating",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id/:rate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id",
+                        ":rate"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                          "description": "UUID identifying the movie."
+                        },
+                        {
+                          "key": "rate",
+                          "value": "8.5",
+                          "description": "New rating for the movie."
+                        }
+                      ]
+                    },
+                    "description": "Updates the rating of a movie."
+                  },
+                  "response": [
+                    {
+                      "name": "Movie rating successfully updated.",
+                      "originalRequest": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/movies/:movie_id/:rate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "movies",
+                            ":movie_id",
+                            ":rate"
+                          ],
+                          "variable": [
+                            {
+                              "key": "movie_id",
+                              "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                              "description": "UUID identifying the movie."
+                            },
+                            {
+                              "key": "rate",
+                              "value": "7.2",
+                              "description": "New rating for the movie."
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": \"720d006c-3a57-4b6a-b18f-9b713b073f3c\",\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\"\n}"
+                    },
+                    {
+                      "name": "Movie with the specified ID was not found.",
+                      "originalRequest": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/movies/:movie_id/:rate",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "movies",
+                            ":movie_id",
+                            ":rate"
+                          ],
+                          "variable": [
+                            {
+                              "key": "movie_id",
+                              "value": "720d006c-3a57-4b6a-b18f-9b713b03543c",
+                              "description": "UUID identifying the movie."
+                            },
+                            {
+                              "key": "rate",
+                              "value": "8.5",
+                              "description": "New rating for the movie."
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"error\": \"Movie id not found\"\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get movie by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/:movie_id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies",
+                    ":movie_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "movie_id",
+                      "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                      "description": "UUID identifying the movie."
+                    }
+                  ]
+                },
+                "description": "Returns a movie matching the specified movie ID."
+              },
+              "response": [
+                {
+                  "name": "Movie matching the specified ID.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "a8034f44-aee4-44cf-b32c-74cf452aaaae",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\",\n  \"id\": \"a8034f44-aee4-44cf-b32c-74cf452aaaae\"\n}"
+                },
+                {
+                  "name": "Movie with the specified ID was not found.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b03543c",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"error\": \"Movie id not found\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Update movie",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.5,\n  \"director\": \"Ridley Scott\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/movies/:movie_id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies",
+                    ":movie_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "movie_id",
+                      "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                      "description": "UUID identifying the movie."
+                    }
+                  ]
+                },
+                "description": "Updates the title, rating, and director of a movie."
+              },
+              "response": [
+                {
+                  "name": "Movie successfully updated.",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"title\": \"The Martiannnnnnnnnnnnnnnn\",\n  \"rating\": 8.5,\n  \"director\": \"Ridley Scott\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": \"720d006c-3a57-4b6a-b18f-9b713b073f3c\",\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\"\n}"
+                },
+                {
+                  "name": "The request is invalid or required data is missing.",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"rating\": 8.5,\n  \"director\": \"Ridley Scott\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"error\": \"No data provided for the field title\"\n}"
+                },
+                {
+                  "name": "Movie with the specified ID was not found.",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.5,\n  \"director\": \"Ridley Scott\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b03543c",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"error\": \"Movie id not found\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Delete movie",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/:movie_id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies",
+                    ":movie_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "movie_id",
+                      "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                      "description": "UUID identifying the movie."
+                    }
+                  ]
+                },
+                "description": "Deletes a movie matching the specified movie ID."
+              },
+              "response": [
+                {
+                  "name": "Movie successfully deleted.",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b073f3c",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "No Content",
+                  "code": 204,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Movie with the specified ID was not found.",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/movies/:movie_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "movies",
+                        ":movie_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "movie_id",
+                          "value": "720d006c-3a57-4b6a-b18f-9b713b03543c",
+                          "description": "UUID identifying the movie."
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"error\": \"Movie id not found\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Get movie by title",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movies?title=The Martian",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ],
+              "query": [
+                {
+                  "description": "Exact title of the movie to find.",
+                  "key": "title",
+                  "value": "The Martian"
+                }
+              ]
+            },
+            "description": "Returns a movie matching the specified title."
+          },
+          "response": [
+            {
+              "name": "Movie matching the specified title.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/movies?title=The Martian",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies"
+                  ],
+                  "query": [
+                    {
+                      "description": "Exact title of the movie to find.",
+                      "key": "title",
+                      "value": "The Martian"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\",\n  \"id\": \"a8034f44-aee4-44cf-b32c-74cf452aaaae\"\n}"
+            },
+            {
+              "name": "The request is invalid or required data is missing.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/movies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"No data provided for the field title\"\n}"
+            },
+            {
+              "name": "Movie with the specified title was not found.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/movies?title=The Martiannnnnn",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies"
+                  ],
+                  "query": [
+                    {
+                      "key": "title",
+                      "value": "The Martiannnnnn",
+                      "description": "Exact title of the movie to find."
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Movie title not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a movie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\",\n  \"id\": \"a8034f44-aee4-44cf-b32c-74cf452aaaae\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ]
+            },
+            "description": "Creates a new movie."
+          },
+          "response": [
+            {
+              "name": "Movie successfully created.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Hulk\",\n  \"rating\": 1.9,\n  \"director\": \"Brice de nice\",\n  \"id\": \"a8034f44-aee4-44cf-b32c-74cf452aa25ae\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/movies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\",\n  \"id\": \"a8034f44-aee4-44cf-b32c-74cf452aaaae\"\n}"
+            },
+            {
+              "name": "The request is invalid or required data is missing.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/movies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"No data provided for the field title\"\n}"
+            },
+            {
+              "name": "A movie with this ID already exists.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"The Martian\",\n  \"rating\": 8.2,\n  \"director\": \"Ridley Scott\",\n  \"id\": \"a8034f44-aee4-44cf-b32c-74cf452aaaae\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/movies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "movies"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Movie id exist\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3200"
+    }
+  ]
+}
