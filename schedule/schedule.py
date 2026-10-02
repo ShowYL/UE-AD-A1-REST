@@ -75,35 +75,6 @@ def get_schedule_endpoint(date):
     return make_response(get_schedule(date), HTTPStatus.OK)
 
 
-@app.route("/schedule/<date>", methods=[HTTPMethod.PUT])
-@mandatory_url_field(fields=["date"])
-@mandatory_body_field(fields=["movies"])
-def update_schedule_endpoint(date):
-    if not schedule_exist(date):
-        return not_found("Schedule for this date")
-
-    movies = request.get_json()["movies"]
-
-    error_type, value = verify_movies(movies)
-
-    if error_type == "SERVICE_ERROR":
-        return make_response(
-            jsonify({"error": "Could not load the movies"}),
-            HTTPStatus.SERVICE_UNAVAILABLE,
-        )
-
-    if error_type == "INVALID_MOVIE":
-        return make_response(
-            jsonify({"error": f"The Movie with the id {value} doesnt exist"}),
-            HTTPStatus.BAD_REQUEST,
-        )
-
-    schedule = get_schedule(date)
-    schedule["movies"] = movies  # pyright: ignore[reportOptionalSubscript]
-    write(schedules)
-    return make_response(schedule, HTTPStatus.OK)
-
-
 @app.route("/schedule", methods=[HTTPMethod.POST])
 @mandatory_body_field(fields=["date", "movies"])
 def add_schedule():

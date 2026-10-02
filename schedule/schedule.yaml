@@ -129,50 +129,6 @@ paths:
               example:
                 error: "Schedule for this date not found"
 
-    put:
-      tags:
-        - Schedules
-      summary: Update schedule
-      description: Updates the list of movies scheduled for the specified date. All movie IDs must exist in the Movie service.
-      operationId: updateSchedule
-      parameters:
-        - $ref: "#/components/parameters/ScheduleDate"
-      requestBody:
-        description: Updated list of movie IDs.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ScheduleUpdate"
-            example:
-              movies:
-                - "96798c08-d19b-4986-a05d-7da856efb697"
-                - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
-      responses:
-        "200":
-          description: Schedule successfully updated.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Schedule"
-              example:
-                date: "20151130"
-                movies:
-                  - "96798c08-d19b-4986-a05d-7da856efb697"
-                  - "39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          description: Schedule for the specified date was not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                error: "Schedule for this date not found"
-        "503":
-          $ref: "#/components/responses/MovieServiceUnavailable"
-
     delete:
       tags:
         - Schedules

@@ -169,61 +169,6 @@ def add_booking():
     return make_response(data, HTTPStatus.CREATED)
 
 
-@app.route("/bookings/<user_id>", methods=[HTTPMethod.PUT])
-@mandatory_url_field(fields=["user_id"])
-@mandatory_body_field(fields=["dates"])
-def update_booking(user_id):
-    if not booking_exist(user_id):
-        return not_found("Booking for user")
-
-    dates = request.get_json()["dates"]
-
-    user_error = verify_user(user_id)
-
-    if user_error == "SERVICE_ERROR":
-        return make_response(
-            jsonify({"error": "Could not load the user"}),
-            HTTPStatus.SERVICE_UNAVAILABLE,
-        )
-
-    if user_error == "INVALID_USER":
-        return make_response(
-            jsonify({"error": f"The User with the id {user_id} doesnt exist"}),
-            HTTPStatus.BAD_REQUEST,
-        )
-
-    error_type, value = verify_dates(dates)
-
-    if error_type == "SERVICE_ERROR":
-        return make_response(
-            jsonify({"error": "Could not load the schedule"}),
-            HTTPStatus.SERVICE_UNAVAILABLE,
-        )
-
-    if error_type == "INVALID_DATE":
-        return make_response(
-            jsonify({"error": f"The Schedule for the date {value} doesnt exist"}),
-            HTTPStatus.BAD_REQUEST,
-        )
-
-    if error_type == "INVALID_MOVIE":
-        return make_response(
-            jsonify(
-                {
-                    "error": f"The Movie with the id {value} is not scheduled for this date"
-                }
-            ),
-            HTTPStatus.BAD_REQUEST,
-        )
-
-    booking = get_booking(user_id)
-    booking["dates"] = dates  # pyright: ignore[reportOptionalSubscript]
-
-    write(bookings)
-
-    return make_response(booking, HTTPStatus.OK)
-
-
 @app.route("/bookings/<user_id>", methods=[HTTPMethod.DELETE])
 @mandatory_url_field(fields=["user_id"])
 def delete_booking(user_id):
