@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "Booking GraphQL",
+    "description": "Requêtes au format GraphQL de Postman, comme dans TP GRAPHQL / Movie. Les mutations modifient les données. Pour la création, user et schedule doivent être disponibles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost" },
+    { "key": "booking_service", "value": ":3201" }
+  ],
+  "item": [
+    {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "bookings",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n    bookings {\n        userid\n        dates {\n            date\n            movies\n        }\n    }\n}",
+                "variables": ""
+              }
+            },
+            "url": { "raw": "{{base_url}}{{booking_service}}/graphql", "host": ["{{base_url}}{{booking_service}}"], "path": ["graphql"] }
+          }
+        },
+        {
+          "name": "booking_with_user_id",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query {\n    booking_with_user_id(_user_id: \"chris_rivers\") {\n        userid\n        dates {\n            date\n            movies\n        }\n    }\n}",
+                "variables": ""
+              }
+            },
+            "url": { "raw": "{{base_url}}{{booking_service}}/graphql", "host": ["{{base_url}}{{booking_service}}"], "path": ["graphql"] }
+          }
+        },
+        {
+          "name": "create_booking",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation {\n    create_booking(\n        _user_id: \"peter_curley\"\n        _dates: [{date: \"20151201\", movies: [\"267eedb8-0f5d-42d5-8f43-72426b9fb3e6\"]}]\n    ) {\n        userid\n        dates {\n            date\n            movies\n        }\n    }\n}",
+                "variables": ""
+              }
+            },
+            "url": { "raw": "{{base_url}}{{booking_service}}/graphql", "host": ["{{base_url}}{{booking_service}}"], "path": ["graphql"] },
+            "description": "Utiliser un utilisateur existant sans réservation et un film programmé à la date indiquée. Cette mutation modifie les données."
+          }
+        },
+        {
+          "name": "delete_booking",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation {\n    delete_booking(_user_id: \"peter_curley\")\n}",
+                "variables": ""
+              }
+            },
+            "url": { "raw": "{{base_url}}{{booking_service}}/graphql", "host": ["{{base_url}}{{booking_service}}"], "path": ["graphql"] },
+            "description": "Supprime la réservation de l'utilisateur indiqué. Vérifier son identifiant avant l'envoi."
+          }
+        }
+      ]
+    }
+  ]
+}
