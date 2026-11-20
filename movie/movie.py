@@ -18,6 +18,7 @@ actor = ObjectType('Actor')
 
 # Association des resolvers écrits avec ceux des schémas
 query.set_field('movie_with_id', r.movie_with_id)
+query.set_field('movies', r.get_all_movies)
 mutation.set_field('update_movie_rate', r.update_movie_rate)
 mutation.set_field('update_movie', r.update_movie)
 mutation.set_field('create_movie', r.create_movie)

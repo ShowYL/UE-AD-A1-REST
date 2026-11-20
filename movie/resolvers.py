@@ -1,6 +1,11 @@
 import json
 from graphql import GraphQLError
 
+def get_all_movies(_, info):
+    with open('{}/databases/movies.json'.format("."), "r") as file:
+        movies = json.load(file)
+        return movies['movies']
+
 def movie_with_id(_, info, _id):
     with open('{}/databases/movies.json'.format("."), "r") as file:
         movies = json.load(file)
