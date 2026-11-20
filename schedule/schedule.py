@@ -1,4 +1,5 @@
 import json
+import os
 from http import HTTPMethod, HTTPStatus
 from typing import List
 
@@ -10,6 +11,7 @@ app = Flask(__name__)
 
 PORT = 3202
 HOST = "0.0.0.0"
+MOVIE_SERVICE = os.environ.get("MOVIE_SERVICE", "http://movie:3200")
 
 with open("{}/databases/times.json".format("."), "r") as jsf:
     schedules = json.load(jsf)["schedule"]
@@ -24,13 +26,28 @@ def write(schedules):
 
 def verify_movies(movies: List[str]):
     try:
-        res = requests.get("http://movie:3200/json", timeout=5)
+        query = """
+        query {
+            movies {
+                id
+            }
+        }
+        """
+        response = requests.post(
+            f"{MOVIE_SERVICE}/graphql",
+            json={"query": query},
+            timeout=5
+        )
 
-        if res.status_code != HTTPStatus.OK:
+        if response.status_code != HTTPStatus.OK:
             return "SERVICE_ERROR", None
 
-        response = res.json()
-        movies_in_db = [movie["id"] for movie in response]
+        result = response.json()
+        
+        if "errors" in result:
+            return "SERVICE_ERROR", None
+
+        movies_in_db = [movie["id"] for movie in result["data"]["movies"]]
 
     except (requests.RequestException, ValueError, KeyError, TypeError):
         return "SERVICE_ERROR", None
