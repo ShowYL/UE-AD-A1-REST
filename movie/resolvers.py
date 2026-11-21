@@ -1,36 +1,29 @@
-import json
 from graphql import GraphQLError
+from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 
 def get_all_movies(_, info):
-    with open('{}/databases/movies.json'.format("."), "r") as file:
-        movies = json.load(file)
-        return movies['movies']
+    """Renvoie tous les films enregistrés en base."""
+    return list(info.context["collection"].find({}))
 
 def movie_with_id(_, info, _id):
-    with open('{}/databases/movies.json'.format("."), "r") as file:
-        movies = json.load(file)
-        for movie in movies['movies']:
-            if movie['id'] == _id:
-                return movie
+    """Recherche un film par son identifiant, ou renvoie None."""
+    return info.context["collection"].find_one({"id": _id})
+
+def movie_by_title(_, info, _title):
+    """Recherche un film par son titre exact, ou renvoie None."""
+    return info.context["collection"].find_one({"title": _title})
+
+def movies_by_minrate(_, info, _rating):
+    """Renvoie les films dont la note est strictement supérieure à _rating."""
+    return list(info.context["collection"].find({"rating": {"$gt": _rating}}))
 
 def update_movie_rate(_, info, _id, _rate):
-    newMovies = {}
-    newMovie = {}
-
-    with open('{}/databases/movies.json'.format("."), "r") as rfile:
-        movies = json.load(rfile)
-        for movie in movies["movies"]:
-            if movie["id"] == _id:
-                movie["rating"] = _rate
-                newMovie = movie
-                newMovies = movies
-
-    with open('{}/databases/movies.json'.format("."), "w") as wfile:
-        json.dump(newMovies, wfile)
-
-    return newMovie
+    """Met à jour la note d'un film et renvoie le film modifié."""
+    return update_movie(_, info, _id, _rating=_rate)
 
 def update_movie(_, info, _id, _title=None, _rating=None, _director=None):
+    """Met à jour les champs fournis et renvoie le film modifié."""
     updates = {
         "title": _title,
         "rating": _rating,
@@ -41,72 +34,34 @@ def update_movie(_, info, _id, _title=None, _rating=None, _director=None):
     if not updates:
         raise GraphQLError("Fournissez au moins un champ à modifier")
 
-    with open("./databases/movies.json", "r") as file:
-        data = json.load(file)
-
-    movie = None
-    for candidate in data["movies"]:
-        if candidate["id"] == _id:
-            movie = candidate
-            break
-
+    movie = info.context["collection"].find_one_and_update(
+        {"id": _id}, {"$set": updates}, return_document=ReturnDocument.AFTER
+    )
     if movie is None:
         raise GraphQLError("Aucun film trouvé avec cet identifiant")
-
-    movie.update(updates)
-
-    with open("./databases/movies.json", "w") as file:
-        json.dump(data, file, indent=2)
-
     return movie
 
 def resolve_actors_in_movie(movie, info):
-    with open('{}/databases/actors.json'.format("."), "r") as file:
-        actors = json.load(file)
-        result = [actor for actor in actors['actors'] if movie['id'] in actor['films']]
-        return result
+    """Renvoie les acteurs associés à ce film."""
+    return list(info.context["actors"].find({"films": movie["id"]}))
 
 def create_movie(_, info, _id, _title, _rating, _director):
-    with open('{}/databases/movies.json'.format("."), "r") as rfile:
-        movies = json.load(rfile)
-    
-    for movie in movies["movies"]:
-        if movie["id"] == _id:
-            raise GraphQLError("Un film avec cet identifiant existe déjà")
-
-    newMovie = {
+    """Crée un film et signale une erreur si son identifiant existe déjà."""
+    movie = {
         "id": _id,
         "title": _title,
         "rating": _rating,
-        "director": _director
+        "director": _director,
     }
-
-    movies["movies"].append(newMovie)
-
-    with open('{}/databases/movies.json'.format("."), "w") as wfile:
-        json.dump(movies, wfile)
-
-    return newMovie
+    try:
+        info.context["collection"].insert_one(movie)
+    except DuplicateKeyError as error:
+        raise GraphQLError("Un film avec cet identifiant existe déjà") from error
+    return movie
 
 def delete_movie(_, info, _id):
-    with open('{}/databases/movies.json'.format("."), "r") as rfile:
-            movies = json.load(rfile)
-
-    remaining_movies = []
-    deleted_movie = None
-
-    for movie in movies["movies"]:
-        if movie["id"] == _id:
-            deleted_movie = movie
-        else:
-            remaining_movies.append(movie)
-
-    if deleted_movie is None:
+    """Supprime un film par son identifiant et confirme sa suppression."""
+    movie = info.context["collection"].find_one_and_delete({"id": _id})
+    if movie is None:
         raise GraphQLError("Aucun film trouvé avec cet identifiant")
-
-    movies["movies"] = remaining_movies
-
-    with open('{}/databases/movies.json'.format("."), "w") as wfile:
-        json.dump(movies, wfile)
-
     return f"Film « {movie['title']} » supprimé"
