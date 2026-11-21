@@ -1,13 +1,24 @@
+import json
 from pathlib import Path
 
 from ariadne import MutationType, QueryType, graphql_sync, load_schema_from_path, make_executable_schema
 from flask import Flask, jsonify, make_response, request
+from pymongo import MongoClient
 
 import resolvers as r
 
 PORT = 3201
 HOST = "0.0.0.0"
 app = Flask(__name__)
+
+client = MongoClient("mongodb://root:example@mongo:27017/")
+db = client["booking"]
+
+if "bookings" not in db.list_collection_names():
+    with (Path(__file__).parent / "databases" / "bookings.json").open() as file:
+        db["bookings"].insert_many(json.load(file)["bookings"])
+
+db["bookings"].create_index("userid", unique=True)
 
 type_defs = load_schema_from_path('booking.graphql')
 
@@ -30,7 +41,9 @@ def home():
 @app.route("/graphql", methods=["POST"])
 def graphql_server():
     data = request.get_json()
-    success, result = graphql_sync(schema, data, context_value=None, debug=app.debug)
+    success, result = graphql_sync(
+        schema, data, context_value={"collection": db["bookings"]}, debug=app.debug
+    )
     return jsonify(result), 200 if success else 400
 
 

@@ -1,24 +1,12 @@
-import json
 import os
 from http import HTTPStatus
-from pathlib import Path
 
 import requests
 from graphql import GraphQLError
+from pymongo.errors import DuplicateKeyError
 
-BOOKINGS_FILE = Path(__file__).parent / "databases" / "bookings.json"
 USER_SERVICE = os.environ.get("USER_SERVICE", "http://user:3203")
 SCHEDULE_SERVICE = os.environ.get("SCHEDULE_SERVICE", "http://schedule:3202")
-
-
-def load_bookings():
-    with open(BOOKINGS_FILE, "r") as file:
-        return json.load(file)
-
-
-def write_bookings(data):
-    with open(BOOKINGS_FILE, "w") as file:
-        json.dump(data, file, indent=2)
 
 
 def verify_user(user_id):
@@ -70,39 +58,41 @@ def verify_dates(dates):
 
 
 def get_all_bookings(_, info):
-    return load_bookings()["bookings"]
+    """Renvoie toutes les réservations enregistrées en base."""
+    return list(info.context["collection"].find({}))
 
 
 def booking_with_user_id(_, info, _user_id):
-    for booking in load_bookings()["bookings"]:
-        if str(booking["userid"]) == _user_id:
-            return booking
-    raise GraphQLError("Booking for user not found", extensions={"code": "NOT_FOUND"})
+    """Recherche la réservation associée à un utilisateur."""
+    booking = info.context["collection"].find_one({"userid": _user_id})
+    if booking is None:
+        raise GraphQLError("Booking for user not found", extensions={"code": "NOT_FOUND"})
+    return booking
 
 
 def create_booking(_, info, _user_id, _dates):
+    """Vérifie les données et crée une réservation pour l'utilisateur."""
     verify_user(_user_id)
-    data = load_bookings()
-
-    for booking in data["bookings"]:
-        if str(booking["userid"]) == _user_id:
-            raise GraphQLError(
-                "Booking for this user already exists",
-                extensions={"code": "BOOKING_ALREADY_EXISTS"},
-            )
-
+    if info.context["collection"].find_one({"userid": _user_id}) is not None:
+        raise GraphQLError(
+            "Booking for this user already exists",
+            extensions={"code": "BOOKING_ALREADY_EXISTS"},
+        )
     verify_dates(_dates)
     new_booking = {"userid": _user_id, "dates": _dates}
-    data["bookings"].append(new_booking)
-    write_bookings(data)
+    try:
+        info.context["collection"].insert_one(new_booking)
+    except DuplicateKeyError as error:
+        raise GraphQLError(
+            "Booking for this user already exists",
+            extensions={"code": "BOOKING_ALREADY_EXISTS"},
+        ) from error
     return new_booking
 
 
 def delete_booking(_, info, _user_id):
-    data = load_bookings()
-    for booking in data["bookings"]:
-        if str(booking["userid"]) == _user_id:
-            data["bookings"].remove(booking)
-            write_bookings(data)
-            return f"Booking for user {_user_id} deleted"
-    raise GraphQLError("Booking for user not found", extensions={"code": "NOT_FOUND"})
+    """Supprime la réservation associée à un utilisateur."""
+    booking = info.context["collection"].find_one_and_delete({"userid": _user_id})
+    if booking is None:
+        raise GraphQLError("Booking for user not found", extensions={"code": "NOT_FOUND"})
+    return f"Booking for user {_user_id} deleted"
