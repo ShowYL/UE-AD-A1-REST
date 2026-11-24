@@ -14,7 +14,7 @@ services:
   schedule:
     build: ./schedule/
     ports:
-      - "3202:3202"
+      - "50052:50052"
   user:
     build: ./user/
     ports:

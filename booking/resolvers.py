@@ -1,12 +1,17 @@
 import os
+import grpc
 from http import HTTPStatus
 
 import requests
 from graphql import GraphQLError
 from pymongo.errors import DuplicateKeyError
 
+import schedule_pb2
+import schedule_pb2_grpc
+from google.protobuf import wrappers_pb2
+
 USER_SERVICE = os.environ.get("USER_SERVICE", "http://user:3203")
-SCHEDULE_SERVICE = os.environ.get("SCHEDULE_SERVICE", "http://schedule:3202")
+SCHEDULE_SERVICE = os.environ.get("SCHEDULE_SERVICE", "schedule:50052")
 
 
 def verify_user(user_id):
@@ -30,24 +35,27 @@ def verify_dates(dates):
     for booking_date in dates:
         date = booking_date["date"]
         try:
-            response = requests.get(f"{SCHEDULE_SERVICE}/schedule/{date}", timeout=5)
-            if response.status_code == HTTPStatus.NOT_FOUND:
+            channel = grpc.insecure_channel(SCHEDULE_SERVICE)
+            stub = schedule_pb2_grpc.ScheduleServiceStub(channel)
+            response = stub.GetSchedule(
+                wrappers_pb2.StringValue(value=date), timeout=5
+            )
+            channel.close()
+        except grpc.RpcError as error:
+            if error.code() == grpc.StatusCode.NOT_FOUND:
                 raise GraphQLError(
                     f"The Schedule for the date {date} doesnt exist",
                     extensions={"code": "INVALID_DATE"},
                 )
-            if response.status_code != HTTPStatus.OK:
-                raise GraphQLError(
-                    "Could not load the schedule", extensions={"code": "SERVICE_ERROR"}
-                )
-            schedule = response.json()
-            scheduled_movies = schedule["movies"]
-            if not isinstance(scheduled_movies, list):
-                raise ValueError("Invalid schedule movies")
-        except (requests.RequestException, ValueError, KeyError, TypeError) as error:
+            raise GraphQLError(
+                "Could not load the schedule", extensions={"code": "SERVICE_ERROR"}
+            )
+        except Exception as error:
             raise GraphQLError(
                 "Could not load the schedule", extensions={"code": "SERVICE_ERROR"}
             ) from error
+
+        scheduled_movies = list(response.movies_id)
 
         for movie in booking_date["movies"]:
             if movie not in scheduled_movies:

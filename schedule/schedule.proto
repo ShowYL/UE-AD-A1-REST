@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+service ScheduleService {
+  rpc GetAllSchedules(google.protobuf.Empty) returns (ScheduleList);
+  rpc GetSchedule(google.protobuf.StringValue) returns (Schedule);
+  rpc AddSchedule(Schedule) returns (Schedule);
+  rpc Delete(Schedule) returns (google.protobuf.Empty);
+}
+
+message ScheduleList {
+  repeated Schedule schedules = 1;
+}
+
+message Schedule {
+  string date = 1;
+  repeated string movies_id = 2;
+}

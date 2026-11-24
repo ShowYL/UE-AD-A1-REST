@@ -36,7 +36,7 @@ conteneurs Docker.
   que l'utilisateur existe, puis auprès de Schedule que les films sont
   programmés aux dates demandées. Son point d'entrée est
   `http://localhost:3201/graphql`.
-- **Schedule — port 3202** : expose une API REST pour consulter, créer et
+- **Schedule — port 50052** : utilise gRPC pour consulter, créer et
   supprimer les programmes de séances. Les données sont stockées dans un fichier
   JSON du conteneur. Lors de la création d'un programme, Schedule interroge
   Movie en GraphQL pour vérifier que les films existent.

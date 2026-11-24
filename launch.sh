@@ -8,4 +8,7 @@ cp lib/utils.py movie/
 cp lib/utils.py user/
 cp lib/utils.py schedule/
 
+cp schedule/schedule_pb2.py booking/
+cp schedule/schedule_pb2_grpc.py booking/
+
 docker compose up --build

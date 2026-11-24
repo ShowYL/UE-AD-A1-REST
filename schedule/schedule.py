@@ -1,16 +1,17 @@
 import json
 import os
-from http import HTTPMethod, HTTPStatus
-from typing import List
+from concurrent import futures
 
+import grpc
 import requests
-from flask import Flask, Response, jsonify, make_response, request
-from utils import mandatory_body_field, mandatory_url_field, not_found
+from http import HTTPStatus
 
-app = Flask(__name__)
+import schedule_pb2
+import schedule_pb2_grpc
+from google.protobuf import empty_pb2
+from google.protobuf import wrappers_pb2
 
-PORT = 3202
-HOST = "0.0.0.0"
+PORT = 50052
 MOVIE_SERVICE = os.environ.get("MOVIE_SERVICE", "http://movie:3200")
 
 with open("{}/databases/times.json".format("."), "r") as jsf:
@@ -24,7 +25,7 @@ def write(schedules):
         json.dump(full, f)
 
 
-def verify_movies(movies: List[str]):
+def verify_movies(movies: list[str]):
     try:
         query = """
         query {
@@ -34,16 +35,14 @@ def verify_movies(movies: List[str]):
         }
         """
         response = requests.post(
-            f"{MOVIE_SERVICE}/graphql",
-            json={"query": query},
-            timeout=5
+            f"{MOVIE_SERVICE}/graphql", json={"query": query}, timeout=5
         )
 
         if response.status_code != HTTPStatus.OK:
             return "SERVICE_ERROR", None
 
         result = response.json()
-        
+
         if "errors" in result:
             return "SERVICE_ERROR", None
 
@@ -59,81 +58,73 @@ def verify_movies(movies: List[str]):
     return None, None
 
 
-@app.route("/", methods=["GET"])
-def home():
-    return "<h1 style='color:blue'>Welcome to the Showtime service!</h1>"
+class ScheduleServiceServicer(schedule_pb2_grpc.ScheduleServiceServicer):
 
-
-def schedule_exist(date):
-    for schedule in schedules:
-        if str(schedule["date"]) == str(date):
-            return True
-    return False
-
-
-def get_schedule(date):
-    for schedule in schedules:
-        if str(schedule["date"]) == str(date):
-            return schedule
-    return None
-
-
-@app.route("/schedule", methods=[HTTPMethod.GET])
-def get_all_schedule():
-    return make_response(schedules, HTTPStatus.OK)
-
-
-@app.route("/schedule/<date>", methods=[HTTPMethod.GET])
-@mandatory_url_field(fields=["date"])
-def get_schedule_endpoint(date):
-    if not schedule_exist(date):
-        return not_found("Schedule for this date")
-
-    return make_response(get_schedule(date), HTTPStatus.OK)
-
-
-@app.route("/schedule", methods=[HTTPMethod.POST])
-@mandatory_body_field(fields=["date", "movies"])
-def add_schedule():
-    data = request.get_json()
-
-    if schedule_exist(data["date"]):
-        return make_response(
-            jsonify({"error": "Schedule id exist"}), HTTPStatus.CONFLICT
+    def GetAllSchedules(self, request, context):
+        return schedule_pb2.ScheduleList(
+            schedules=[
+                schedule_pb2.Schedule(date=s["date"], movies_id=s["movies"])
+                for s in schedules
+            ]
         )
 
-    error_type, value = verify_movies(data["movies"])
+    def GetSchedule(self, request, context):
+        date = request.value
+        for s in schedules:
+            if str(s["date"]) == str(date):
+                return schedule_pb2.Schedule(date=s["date"], movies_id=s["movies"])
+        context.set_code(grpc.StatusCode.NOT_FOUND)
+        context.set_details(f"Schedule for date {date} not found")
+        return schedule_pb2.Schedule()
 
-    if error_type == "SERVICE_ERROR":
-        return make_response(
-            jsonify({"error": "Could not load the movies"}),
-            HTTPStatus.SERVICE_UNAVAILABLE,
-        )
+    def AddSchedule(self, request, context):
+        date = request.date
+        movies = list(request.movies_id)
 
-    if error_type == "INVALID_MOVIE":
-        return make_response(
-            jsonify({"error": f"The Movie with the id {value} doesnt exist"}),
-            HTTPStatus.BAD_REQUEST,
-        )
+        if any(str(s["date"]) == str(date) for s in schedules):
+            context.set_code(grpc.StatusCode.ALREADY_EXISTS)
+            context.set_details(f"Schedule for date {date} already exists")
+            return schedule_pb2.Schedule()
 
-    schedules.append(data)
-    write(schedules)
-    return make_response(data, HTTPStatus.CREATED)
+        error_type, value = verify_movies(movies)
+
+        if error_type == "SERVICE_ERROR":
+            context.set_code(grpc.StatusCode.UNAVAILABLE)
+            context.set_details("Could not load the movies")
+            return schedule_pb2.Schedule()
+
+        if error_type == "INVALID_MOVIE":
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(f"The Movie with the id {value} doesnt exist")
+            return schedule_pb2.Schedule()
+
+        new_schedule = {"date": date, "movies": movies}
+        schedules.append(new_schedule)
+        write(schedules)
+        return schedule_pb2.Schedule(date=date, movies_id=movies)
+
+    def Delete(self, request, context):
+        date = request.date
+        for s in schedules:
+            if str(s["date"]) == str(date):
+                schedules.remove(s)
+                write(schedules)
+                return empty_pb2.Empty()
+        context.set_code(grpc.StatusCode.NOT_FOUND)
+        context.set_details(f"Schedule for date {date} not found")
+        return empty_pb2.Empty()
 
 
-@app.route("/schedule/<date>", methods=[HTTPMethod.DELETE])
-@mandatory_url_field(fields=["date"])
-def delete_schedule(date):
-    if not schedule_exist(date):
-        return not_found("Schedule for this date")
-
-    schedule = get_schedule(date)
-
-    schedules.remove(schedule)
-    write(schedules)
-    return Response(status=HTTPStatus.NO_CONTENT)
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    schedule_pb2_grpc.add_ScheduleServiceServicer_to_server(
+        ScheduleServiceServicer(), server
+    )
+    server.add_insecure_port(f"[::]:{PORT}")
+    server.start()
+    print(f"Schedule server running on port {PORT}")
+    server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    print("Server running in port %s" % (PORT))
-    app.run(host=HOST, port=PORT)
+    serve()
