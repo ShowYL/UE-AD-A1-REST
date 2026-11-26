@@ -1,1 +1,4 @@
 .venv
+*/requirements.txt
+*/auth.py
+!/lib/auth.py

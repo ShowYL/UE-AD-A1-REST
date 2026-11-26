@@ -8,6 +8,10 @@ cp lib/utils.py movie/
 cp lib/utils.py user/
 cp lib/utils.py schedule/
 
+cp lib/auth.py booking/
+cp lib/auth.py movie/
+cp lib/auth.py schedule/
+
 cp schedule/schedule_pb2.py booking/
 cp schedule/schedule_pb2_grpc.py booking/
 
