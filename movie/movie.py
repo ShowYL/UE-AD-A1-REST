@@ -62,7 +62,8 @@ def graphql_server():
     success, result = graphql_sync(
                         schema,
                         data,
-                        context_value={"collection": db["movies"], "actors": db["actors"]},
+                        context_value={"collection": db["movies"], "actors": db["actors"],
+                                       "authorization": request.headers.get("Authorization")},
                         debug=app.debug
                     )
     status_code = 200 if success else 400

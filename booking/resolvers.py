@@ -6,6 +6,8 @@ import requests
 from graphql import GraphQLError
 from pymongo.errors import DuplicateKeyError
 
+from auth import AuthError, authorize
+
 import schedule_pb2
 import schedule_pb2_grpc
 from google.protobuf import wrappers_pb2
@@ -100,6 +102,15 @@ def create_booking(_, info, _user_id, _dates):
 
 def delete_booking(_, info, _user_id):
     """Supprime la réservation associée à un utilisateur."""
+    try:
+        current_user = authorize(info.context.get("authorization"))
+    except AuthError as error:
+        raise GraphQLError(str(error), extensions={"code": error.status.name}) from error
+    if current_user["id"] != _user_id:
+        raise GraphQLError(
+            "You are not authorized to delete this booking",
+            extensions={"code": "FORBIDDEN"},
+        )
     booking = info.context["collection"].find_one_and_delete({"userid": _user_id})
     if booking is None:
         raise GraphQLError("Booking for user not found", extensions={"code": "NOT_FOUND"})

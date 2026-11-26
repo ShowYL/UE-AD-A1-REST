@@ -42,7 +42,8 @@ def home():
 def graphql_server():
     data = request.get_json()
     success, result = graphql_sync(
-        schema, data, context_value={"collection": db["bookings"]}, debug=app.debug
+        schema, data, context_value={"collection": db["bookings"],
+                                     "authorization": request.headers.get("Authorization")}, debug=app.debug
     )
     return jsonify(result), 200 if success else 400
 

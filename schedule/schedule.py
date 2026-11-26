@@ -6,6 +6,7 @@ import grpc
 import requests
 from http import HTTPStatus
 
+from auth import AuthError, authorize
 import schedule_pb2
 import schedule_pb2_grpc
 from google.protobuf import empty_pb2
@@ -104,6 +105,16 @@ class ScheduleServiceServicer(schedule_pb2_grpc.ScheduleServiceServicer):
         return schedule_pb2.Schedule(date=date, movies_id=movies)
 
     def Delete(self, request, context):
+        authorization = dict(context.invocation_metadata()).get("authorization")
+        try:
+            authorize(authorization, admin=True)
+        except AuthError as error:
+            codes = {
+                HTTPStatus.UNAUTHORIZED: grpc.StatusCode.UNAUTHENTICATED,
+                HTTPStatus.FORBIDDEN: grpc.StatusCode.PERMISSION_DENIED,
+                HTTPStatus.SERVICE_UNAVAILABLE: grpc.StatusCode.UNAVAILABLE,
+            }
+            context.abort(codes[error.status], str(error))
         date = request.date
         for s in schedules:
             if str(s["date"]) == str(date):

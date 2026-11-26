@@ -43,3 +43,4 @@ def authorize(authorization, admin=False):
     # Check if the user has the required role if admin access is needed
     if admin and role != "admin":
         raise AuthError(HTTPStatus.FORBIDDEN, "Admin role required")
+    return user

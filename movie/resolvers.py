@@ -2,6 +2,8 @@ from graphql import GraphQLError
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
+from auth import AuthError, authorize
+
 def get_all_movies(_, info):
     """Renvoie tous les films enregistrés en base."""
     return list(info.context["collection"].find({}))
@@ -61,6 +63,10 @@ def create_movie(_, info, _id, _title, _rating, _director):
 
 def delete_movie(_, info, _id):
     """Supprime un film par son identifiant et confirme sa suppression."""
+    try:
+        authorize(info.context.get("authorization"), admin=True)
+    except AuthError as error:
+        raise GraphQLError(str(error), extensions={"code": error.status.name}) from error
     movie = info.context["collection"].find_one_and_delete({"id": _id})
     if movie is None:
         raise GraphQLError("Aucun film trouvé avec cet identifiant")
