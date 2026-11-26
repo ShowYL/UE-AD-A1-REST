@@ -1,0 +1,778 @@
+{
+  "info": {
+    "_postman_id": "3a2ed3b0-880d-463c-a6d8-7ab96df5912c",
+    "name": "Présentation - User, Movie, Schedule, Booking",
+    "description": "Exécuter User, puis Movie, puis les requêtes gRPC Schedule décrites dans le guide, puis Booking. Les suppressions utilisent des données de démonstration.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49360621",
+    "_collection_link": "https://go.postman.co/collection/49360621-3a2ed3b0-880d-463c-a6d8-7ab96df5912c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. User - REST",
+      "item": [
+        {
+          "name": "01 - Accueil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_url}}/",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Inscrire un utilisateur pour Booking",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now().toString();",
+                  "pm.collectionVariables.set('demo_name', 'Demo Postman ' + suffix);",
+                  "pm.collectionVariables.set('demo_user_id', 'demo_postman_' + suffix);",
+                  "pm.collectionVariables.set('temp_name', 'Demo Temp ' + suffix);",
+                  "pm.collectionVariables.set('temp_user_id', 'demo_temp_' + suffix);",
+                  "pm.collectionVariables.set('movie_id', 'demo-film-' + suffix);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{demo_name}}\",\"password\":\"demo\"}"
+            },
+            "url": {
+              "raw": "{{user_url}}/register",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02Bis - field manquant Inscrire un utilisateur",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now().toString();\npm.collectionVariables.set('demo_name', 'Demo Postman ' + suffix);\npm.collectionVariables.set('demo_user_id', 'demo_postman_' + suffix);\npm.collectionVariables.set('temp_name', 'Demo Temp ' + suffix);\npm.collectionVariables.set('temp_user_id', 'demo_temp_' + suffix);\npm.collectionVariables.set('movie_id', 'demo-film-' + suffix);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{demo_name}}\"}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{user_url}}/register",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Connexion de l'utilisateur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.set('user_token', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{demo_name}}\",\"password\":\"demo\"}"
+            },
+            "url": {
+              "raw": "{{user_url}}/login",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - Connexion de l'admin Chris Rivers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.set('admin_token', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Chris Rivers\",\"password\":\"test\"}"
+            },
+            "url": {
+              "raw": "{{user_url}}/login",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Vérifier le token utilisateur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/auth/verify",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Lister les utilisateurs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_url}}/json",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "json"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 - Consulter l'utilisateur créé",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_url}}/user/{{demo_user_id}}",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "user",
+                "{{demo_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 - Modifier l'utilisateur créé",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{demo_name}}\",\"last_active\":1900000000}"
+            },
+            "url": {
+              "raw": "{{user_url}}/user/{{demo_user_id}}",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "user",
+                "{{demo_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 - Créer un utilisateur temporaire",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"{{temp_name}}\",\"password\":\"demo\"}"
+            },
+            "url": {
+              "raw": "{{user_url}}/register",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 - Supprimer l'utilisateur temporaire en admin",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/user/{{temp_user_id}}",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "user",
+                "{{temp_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Créer les utilisateurs de démonstration et récupérer les deux tokens avant les autres services."
+    },
+    {
+      "name": "2. Movie - GraphQL",
+      "item": [
+        {
+          "name": "01 - Accueil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{movie_url}}/",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Tous les films",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { movies { id title rating director } }\"}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Film par identifiant et acteurs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { movie_with_id(_id: \\\"267eedb8-0f5d-42d5-8f43-72426b9fb3e6\\\") { id title actors { id firstname lastname birthyear } } }\"}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - Film par titre",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { movie_by_title(_title: \\\"Creed\\\") { id title rating director } }\"}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Films au-dessus d'une note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { movies_by_minrate(_rating: 8.0) { id title rating } }\"}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Créer un film de démonstration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation($id: String!) { create_movie(_id: $id, _title: \\\"Film Demo\\\", _rating: 7.0, _director: \\\"Realisateur Demo\\\") { id title rating director } }\",\"variables\":{\"id\":\"{{movie_id}}\"}}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 - Modifier le film",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation($id: String!) { update_movie(_id: $id, _title: \\\"Film Demo Modifie\\\", _director: \\\"Nouveau Realisateur\\\") { id title rating director } }\",\"variables\":{\"id\":\"{{movie_id}}\"}}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 - Modifier la note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation($id: String!) { update_movie_rate(_id: $id, _rate: 8.5) { id title rating } }\",\"variables\":{\"id\":\"{{movie_id}}\"}}"
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 - Supprimer le film en admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation($id: String!) { delete_movie(_id: $id) }\",\"variables\":{\"id\":\"{{movie_id}}\"}}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{movie_url}}/graphql",
+              "host": [
+                "{{movie_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Toutes les opérations GraphQL utilisent POST /graphql. Le film de démonstration est supprimé à la fin."
+    },
+    {
+      "name": "4. Booking - GraphQL",
+      "item": [
+        {
+          "name": "01 - Accueil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{booking_url}}/",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Toutes les réservations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query { bookings { userid dates { date movies } } }\"}"
+            },
+            "url": {
+              "raw": "{{booking_url}}/graphql",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Créer une réservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation($id: String!) { create_booking(_user_id: $id, _dates: [{date: \\\"20151201\\\", movies: [\\\"267eedb8-0f5d-42d5-8f43-72426b9fb3e6\\\"]}]) { userid dates { date movies } } }\",\"variables\":{\"id\":\"{{demo_user_id}}\"}}"
+            },
+            "url": {
+              "raw": "{{booking_url}}/graphql",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - Consulter la réservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"query($id: String!) { booking_with_user_id(_user_id: $id) { userid dates { date movies } } }\",\"variables\":{\"id\":\"{{demo_user_id}}\"}}"
+            },
+            "url": {
+              "raw": "{{booking_url}}/graphql",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Supprimer sa réservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"query\":\"mutation($id: String!) { delete_booking(_user_id: $id) }\",\"variables\":{\"id\":\"{{demo_user_id}}\"}}"
+            },
+            "url": {
+              "raw": "{{booking_url}}/graphql",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Nettoyage : supprimer son utilisateur",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/user/{{demo_user_id}}",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "user",
+                "{{demo_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Utilise l'utilisateur créé dans User, ainsi que Creed et la séance initiale du 20151201. Supprime ensuite la réservation et l'utilisateur de démonstration."
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Statut HTTP réussi', () => pm.expect(pm.response.code).to.be.below(400));",
+          "if ((pm.response.headers.get('Content-Type') || '').includes('application/json')) {",
+          "  const body = pm.response.json();",
+          "  pm.test('Aucune erreur GraphQL', () => pm.expect(body.errors).to.be.undefined);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "user_url",
+      "value": "http://localhost:3203"
+    },
+    {
+      "key": "movie_url",
+      "value": "http://localhost:3200"
+    },
+    {
+      "key": "booking_url",
+      "value": "http://localhost:3201"
+    },
+    {
+      "key": "demo_name",
+      "value": ""
+    },
+    {
+      "key": "demo_user_id",
+      "value": ""
+    },
+    {
+      "key": "temp_name",
+      "value": ""
+    },
+    {
+      "key": "temp_user_id",
+      "value": ""
+    },
+    {
+      "key": "movie_id",
+      "value": ""
+    },
+    {
+      "key": "user_token",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    }
+  ]
+}

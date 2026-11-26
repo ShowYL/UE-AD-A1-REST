@@ -12,4 +12,4 @@ cp lib/auth.py schedule/
 cp schedule/schedule_pb2.py booking/
 cp schedule/schedule_pb2_grpc.py booking/
 
-docker compose up --build
+docker compose up --build -d
