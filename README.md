@@ -72,8 +72,7 @@ locales de ces fichiers.
 
 ## Les services
 
-Tous les services sont écrits en Python avec Flask et sont exécutés dans des
-conteneurs Docker.
+Tous les services composants l'application sont :
 
 - **Movie — port 3200** : utilise GraphQL avec Ariadne et stocke les films et
   les acteurs dans MongoDB avec PyMongo. Il permet de rechercher, créer,
