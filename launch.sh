@@ -3,10 +3,7 @@ cp requirements.txt movie/
 cp requirements.txt user/
 cp requirements.txt schedule/
 
-cp lib/utils.py booking/
-cp lib/utils.py movie/
 cp lib/utils.py user/
-cp lib/utils.py schedule/
 
 cp lib/auth.py booking/
 cp lib/auth.py movie/
